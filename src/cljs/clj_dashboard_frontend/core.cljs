@@ -43,7 +43,7 @@
 
   ([section node]
     ;(map #(conj node %) (create-command-node-for-section section))
-    ;;; TODO: is there a better way to do this without looping?
+    ;;; TODO: is there a better way to do this without looping??
    (loop [section section
           node node]
      (let [current-section (first section)
