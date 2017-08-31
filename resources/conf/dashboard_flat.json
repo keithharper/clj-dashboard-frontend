@@ -1,0 +1,40 @@
+[{
+    "section": "Components",
+    "commands": [{
+                    "command": "Internet Connectivity",
+                    "commandValue": "python /home/riotx/production/scripts/ConnectivityTest.py 8.8.8.8"
+                },{
+                    "command": "SIM Communication",
+                    "commandValue": "python /home/riotx/production/scripts/SIMTest.py /home/riotx/production/scripts/checkSIM.sh"
+                },{
+                    "command": "GPS Antenna",
+                    "commandValue": "python /home/riotx/production/scripts/GPSTest.py antenna"
+                },{
+                    "command": "GPS Fix",
+                    "commandValue": "python /home/riotx/production/scripts/GPSTest.py fix"
+                },{
+                    "command": "Storage Device",
+                    "commandValue": "python /home/riotx/production/scripts/StorageTest.py /mnt/dvr-data"
+                },{
+                    "command": "PoE Voltage",
+                    "commandValue": "python /home/riotx/production/scripts/PoETest.py poe"
+                },{
+                    "command": "Port 1 PoE",
+                    "commandValue": "python /home/riotx/production/scripts/PoETest.py port1"
+                },{
+                    "command": "Port 2 PoE",
+                    "commandValue": "python /home/riotx/production/scripts/PoETest.py port2"
+                },{
+                    "command": "Port 3 PoE",
+                    "commandValue": "python /home/riotx/production/scripts/PoETest.py port3"
+                },{
+                    "command": "Port 4 PoE",
+                    "commandValue": "python /home/riotx/production/scripts/PoETest.py port4"
+                },{
+                    "command": "Top Wireless Card (AP)",
+                    "commandValue": "python /home/riotx/production/scripts/WiFiCardTest.py top"
+                },{
+                    "command": "Bottom Wireless Card (Client)",
+                    "commandValue": "python /home/riotx/production/scripts/WiFiCardTest.py bottom"
+                }]
+}]
