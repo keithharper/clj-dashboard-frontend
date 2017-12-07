@@ -3,12 +3,12 @@
 			[dashboard.views.advanced]))
 
 (defn group-section-and-command
-  [sections->commands]
+  [dispatcher sections->commands]
   (reduce
 	(fn [commands-to-run [section-id section]]
 	  (apply conj commands-to-run
 		(map (fn [[command-id command]]
-			   (identity [:fetch-command-result {:section section-id :command command-id}]))
+			   (identity [(keyword dispatcher) {:section section-id :command command-id}]))
 		  (:commands section))))
 	[]
 	sections->commands))

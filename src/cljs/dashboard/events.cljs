@@ -52,20 +52,22 @@
 (reg-event-fx
   :fetch-available-commands
   (fn [{:keys [db]} _]
-	{:http-xhrio {:uri             (str js/location.pathname "/commands")
-				  :method          :get
-				  :timeout         8000
-				  :response-format (ajax/json-response-format {:keywords? true})
-				  :on-success      [:add-available-commands]}}))
+	(when (empty? (get-in db [:available-commands]))
+	  {:http-xhrio {:uri             (str js/location.pathname "/commands")
+					:method          :get
+					:timeout         8000
+					:response-format (ajax/json-response-format {:keywords? true})
+					:on-success      [:add-available-commands]}})))
 
 (reg-event-fx
   :fetch-available-admin-commands
   (fn [{:keys [db]} _]
-	{:http-xhrio {:uri             "/advanced/commands"
-				  :method          :get
-				  :timeout         8000
-				  :response-format (ajax/json-response-format {:keywords? true})
-				  :on-success      [:add-available-admin-commands]}}))
+	(when (empty? (get-in db [:available-admin-commands]))
+	  {:http-xhrio {:uri             "/advanced/commands"
+					:method          :get
+					:timeout         8000
+					:response-format (ajax/json-response-format {:keywords? true})
+					:on-success      [:add-available-admin-commands]}})))
 
 (reg-event-fx
   :fetch-command-result
@@ -82,7 +84,12 @@
 (reg-event-fx
   :fetch-all-command-results
   (fn [{:keys [db]} _]
-	{:dispatch-n (helpers/group-section-and-command (:available-commands db))}))
+	{:dispatch-n (helpers/group-section-and-command :fetch-command-result (:available-commands db))}))
+
+(reg-event-fx
+  :fetch-all-selected-command-results
+  (fn [{:keys [db]} _]
+	{:dispatch-n (helpers/group-section-and-command :fetch-advanced-command-result (:selected-commands db))}))
 
 ;;; Admin Events ;;;
 (reg-event-db
@@ -95,7 +102,7 @@
   :set-command-active
   trim-v
   (fn [db [{:keys [section command]}]]
-	(assoc-in db [:available-admin-commands section :commands command :active] "active")))
+	(assoc-in db [:available-admin-commands section :commands command :active] true)))
 
 (reg-event-db
   :set-command-inactive
@@ -103,19 +110,17 @@
   (fn [db [{:keys [section command]}]]
 	(update-in db [:available-admin-commands section :commands command] dissoc :active)))
 
-(reg-event-fx
+(reg-event-db
   :add-selected-command
   trim-v
-  (fn [{:keys [db]} [{:keys [section command execution-ts result] :as section->command}]]
-	{:dispatch [:set-command-active section->command]
-	 :db       (assoc-in db [:selected-commands section :commands command] (dissoc section->command :section))}))
+  (fn [db [{:keys [section command execution-ts result] :as section->command}]]
+	(assoc-in db [:selected-commands section :commands command] (dissoc section->command :section))))
 
-(reg-event-fx
+(reg-event-db
   :remove-selected-command
   trim-v
-  (fn [{:keys [db]} [{:keys [section command] :as section->command}]]
-	{:dispatch [:set-command-inactive section->command]
-	 :db       (update-in db [:selected-commands section :commands] dissoc command)}))
+  (fn [db [{:keys [section command] :as section->command}]]
+	(update-in db [:selected-commands section :commands] dissoc command)))
 
 (reg-event-db
   :set-menu-inactive
@@ -160,9 +165,9 @@
   (fn [db [{:keys [section]}]]
 	(let [active? (get-in db [:available-admin-commands section :active])]
 	  (assoc-in db [:available-admin-commands section :active]
-		(if-not (nil? active?)
-		  nil
-		  "active")))))
+		(if active?
+		  false
+		  true)))))
 
 (reg-event-fx
   :fetch-advanced-command-result

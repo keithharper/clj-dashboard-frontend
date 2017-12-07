@@ -13,6 +13,5 @@
 				[advanced/ui])))
 
 (defn main-panel []
-  (let [active-page @(rf/subscribe [:active-page])
-		alert-message @(rf/subscribe [:alert-message])]
+  (let [active-page @(rf/subscribe [:active-page])]
 	[page active-page]))

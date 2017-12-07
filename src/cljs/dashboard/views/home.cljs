@@ -21,7 +21,7 @@
 	[loading-spinner]))
 
 (defn command-nodes-to-section [{:keys [section command result] :as section->command}]
-  ^{:key command}
+  ^{:key (str "dashboard-" command)}
   [:div.card__command-node
    [:div.card__command-status {:on-click #(dispatch [:fetch-command-result section->command])}
 	(parse-result result)]
@@ -29,7 +29,7 @@
 
 
 (defn base-section-node [{:keys [section-id section]}]
-  ^{:key section-id}
+  ^{:key (str "dashboard-" section-id)}
   [:div.section
    [:div.card__container
 	[:div.card__command-section

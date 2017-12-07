@@ -5,29 +5,34 @@
 			[dashboard.views.images :as images]))
 
 (defn command-nodes-to-section [{:keys [section command active] :as section->command}]
-  ^{:key command}
-  [:div.sidebar__item.mdl-button {:class active :on-click #(dispatch [:fetch-advanced-command-result section->command])}
-   [:div.command-node command]
-   [:button.sidebar-button
-	[:span.plus-horizontal]
-	[:span.plus-vertical]]])
+  (let [selected? @(subscribe [:get-selected-command section->command])]
+	^{:key command}
+	[:div.sidebar__item.mdl-button
+	 {:class    (when selected? "active")
+	  :on-click #(if-not selected?
+				   (dispatch [:fetch-advanced-command-result section->command])
+				   (dispatch [:remove-selected-command section->command]))}
+	 [:div.command-node command]
+	 [:button.sidebar-button
+	  [:span.plus-horizontal]
+	  [:span.plus-vertical]]]))
 
 (defn sidebar-section [{:keys [section-id section]}]
   ^{:key section-id}
   [:div
    [:button.accordion.mdl-button
-	{:class    (:active section)
+	{:class    (when (:active section) "active")
 	 :on-click #(dispatch [:set-section-active section])}
 
 	[:div.sidebar__section__arrow]
 	[:div.sidebar__section__label section-id]]
-   [:div.sidebar__section {:class (:active section)}
-	(map #(command-nodes-to-section {:section section-id :command (first %) :active (:active (second %))})
-	  (:commands section))]])
+   [:div.sidebar__section {:class (when (:active section) "active")}
+	(doall (map #(command-nodes-to-section {:section section-id :command (first %) :active (:active (second %))})
+			 (:commands section)))]])
 
 (defn sidebar-menu-nodes []
   (let [available-admin-commands @(subscribe [:available-admin-commands])]
-	(map #(sidebar-section {:section-id (first %) :section (second %)}) available-admin-commands)))
+	(doall (map #(sidebar-section {:section-id (first %) :section (second %)}) available-admin-commands))))
 
 (defn command-card [{:keys [section command execution-ts result] :as section->command}]
   ^{:key command}
@@ -48,12 +53,14 @@
 	  selected-commands)))
 
 (defn card-container []
-  [:div.main {:on-click #(dispatch [:set-menu-inactive])}
-   (seq (command-nodes))])
+  (let [menu-status @(subscribe [:menu-status])]
+	[:div.main {:on-click #(dispatch [:set-menu-inactive])}
+	 [:div {:class (when menu-status "sidebar-active")}]
+	 (seq (command-nodes))]))
 
 (defn sidebar-menu []
   (let [menu-status @(subscribe [:menu-status])]
-	[:div.sidebar {:class menu-status}
+	[:div.sidebar {:class (when menu-status "active")}
 	 (seq (sidebar-menu-nodes))]))
 
 (defn alert-container []
@@ -101,7 +108,7 @@
 	:aria-label "Refresh"
 	:style      {:padding "3px" :background-color "transparent"}
 	:title      "Refresh output of all selected commands"
-	:on-click   #(dispatch [:fetch-all-command-results])}
+	:on-click   #(dispatch [:fetch-all-selected-command-results])}
    "Refresh All"
    (:refresh-all-image images/svgs)])
 
@@ -134,7 +141,7 @@
   (let [menu-status @(subscribe [:menu-status])]
 	[:button.mdl-button.c-hamburger.c-hamburger--htla
 	 {:id       "menu-button"
-	  :class    menu-status
+	  :class    (when menu-status "active")
 	  :on-click #(dispatch [:toggle-menu])}
 	 [:span "Toggle menu"]]))
 

@@ -7,4 +7,4 @@
   (let [active-page @(subscribe [:active-page])]
 	(case
 	  :home-page [dashboard.views.home/ui]
-				 :advanced-page [dashboard.views.advanced/ui])))
+	  :advanced-page [dashboard.views.advanced/ui])))

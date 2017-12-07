@@ -32,9 +32,7 @@
 (reg-sub
   :menu-status
   (fn [db _]
-	(if (:menu-status db)
-	  "active"
-	  "")))
+	(:menu-status db)))
 
 (reg-sub
   :any-request-pending
@@ -51,6 +49,12 @@
 	(subscribe [:available-commands]))
   (fn get-command-result [commands-db [_ {:keys [section command]}]]
 	(get-in commands-db [section :commands command :result])))
+
+(reg-sub
+  :get-selected-command
+  :<- [:selected-commands]
+  (fn [db [_ {:keys [section command]}]]
+	(not (nil? (get-in db [section :commands command])))))
 
 (reg-sub
   :get-command-loading
