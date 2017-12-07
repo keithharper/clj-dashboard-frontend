@@ -1,87 +1,52 @@
 [
   {
     "section": "Network",
-    "command": "Interface Status",
-    "command-value": "ifconfig -a"
-  },
-  {
-    "section": "Network",
-    "command": "Configured Connections",
-    "command-value": "/home/riotx/production/scripts/checkConnectionPropertiesFile.sh"
-  },
-  {
-    "section": "Network",
-    "command": "WiFi Access Point Status",
-    "command-value": "wpa_cli status"
-  },
-  {
-    "section": "Network",
-    "command": "Wireless Interface Status",
-    "command-value": "iwconfig"
-  },
-  {
-    "section": "Network",
-    "command": "Cell Status",
-    "command-value": "cat /tmp/get-service.out"
-  },
-  {
-    "section": "Network",
-    "command": "Routing Table",
-    "command-value": "ip route"
+    "commands": [
+      { "command": "Interface Status",
+        "command-value": "ifconfig -a" },
+      { "command": "Configured Connections",
+        "command-value": "/home/riotx/production/scripts/checkConnectionPropertiesFile.sh" },
+      { "command": "WiFi Access Point Status",
+        "command-value": "wpa_cli status" },
+      { "command": "Wireless Interface Status",
+        "command-value": "iwconfig" },
+      { "command": "Cell Status",
+        "command-value": "cat /tmp/get-service.out" },
+      { "command": "Routing Table",
+        "command-value": "ip route" }]
   },
   {
     "section": "Devices",
-    "command": "Disk Usage",
-    "command-value": "df -h"
-  },
-  {
-    "section": "Devices",
-    "command": "USB Devices",
-    "command-value": "lsusb"
-  },
-  {
-    "section": "Devices",
-    "command": "PCI Devices",
-    "command-value": "lspci"
+    "commands": [
+      { "command": "Disk Usage",
+        "command-value": "df -h" },
+      { "command": "USB Devices",
+        "command-value": "lsusb" },
+      { "command": "PCI Devices",
+        "command-value": "lspci" }]
   },
   {
     "section": "System",
-    "command": "Firmware Version",
-    "command-value": "head -n 1 /etc/firmware.conf"
-  },
-  {
-    "section": "System",
-    "command": "Uptime",
-    "command-value": "uptime -p"
-  },
-  {
-    "section": "System",
-    "command": "PoE Voltage",
-    "command-value": "/home/riotx/production/scripts/poeVoltage.sh"
-  },
-  {
-    "section": "System",
-    "command": "Kernel Log",
-    "command-value": "dmesg"
-  },
-  {
-    "section": "System",
-    "command": "List Unuploaded Files",
-    "command-value": "/home/riotx/production/scripts/getUnuploadedFiles.sh"
+    "commands": [
+      { "command": "Firmware Version",
+        "command-value": "head -n 1 /etc/firmware.conf" },
+      { "command": "Uptime",
+        "command-value": "uptime -p" },
+      { "command": "PoE Voltage",
+        "command-value": "/home/riotx/production/scripts/poeVoltage.sh" },
+      { "command": "Kernel Log",
+        "command-value": "dmesg" },
+      { "command": "List Unuploaded Files",
+        "command-value": "/home/riotx/production/scripts/getUnuploadedFiles.sh" }]
   },
   {
     "section": "Admin",
-    "command": "Shutdown",
-    "command-value": "/home/riotx/production/scripts/shutdown.sh"
-  },
-  {
-    "section": "Admin",
-    "command": "Gigabit",
-    "command-value": "/home/riotx/production/scripts/ConfigureGigabit.sh"
-  },
-  {
-    "section": "Admin",
-    "command": "Upload",
-    "command-value": "/home/riotx/production/scripts/ToggleUpload.sh"
+    "commands": [
+      { "command": "Shutdown",
+        "command-value": "/home/riotx/production/scripts/shutdown.sh" },
+      { "command": "Gigabit",
+        "command-value": "/home/riotx/production/scripts/ConfigureGigabit.sh" },
+      { "command": "Upload",
+        "command-value": "/home/riotx/production/scripts/ToggleUpload.sh" }]
   }
 ]
