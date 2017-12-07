@@ -11,8 +11,8 @@
 ;;; collection lookup ;;;
 
 (def command-types
-	{:dashboard-image dashboard-commands
-	 :advanced-image  advanced-commands})
+	{:dashboard dashboard-commands
+	 :advanced  advanced-commands})
 
 ;;; collection helper functions ;;;
 
