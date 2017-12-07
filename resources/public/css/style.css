@@ -436,9 +436,13 @@ body {
   /* transition: margin-left .5s; */
 }
 
-/*.main.sidebar-active {
-    margin-left: 250px;
-}*/
+.sidebar-active {
+    background: rgba(0,0,0,0.5);
+    z-index: 1;
+    height: 100%;
+    position: fixed;
+    width: 100%;
+}
 
 .dialog-container {
   background: rgba(0, 0, 0, 0.57);
