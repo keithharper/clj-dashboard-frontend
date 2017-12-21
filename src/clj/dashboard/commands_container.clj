@@ -16,7 +16,7 @@
 
 ;;; collection helper functions ;;;
 
-(defn filter-for-command-value [command-type section command]
+(defn filter-for-command-value [{:keys [section command command-type]}]
   (let [commands-coll (command-type command-types)]
 	(->> commands-coll
 	  (filter #(= (:section %) section))
@@ -31,5 +31,5 @@
 	(filter #(not= "Admin" (:section %)))
 	(map (fn [section] (assoc-in section [:commands] (map #(dissoc % :command-value) (:commands section)))) )))
 
-(defn prepare-commands-from-coll [command-type]
+(defn get-commands-for-type [command-type]
   (json/write-str (prepare-command-list (command-type command-types))))
