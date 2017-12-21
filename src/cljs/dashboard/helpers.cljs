@@ -2,7 +2,7 @@
   (:require [dashboard.views.home]
 			[dashboard.views.advanced]))
 
-(defn group-section-and-command
+(defn group-dispatcher-and-command
   [dispatcher sections->commands]
   (reduce
 	(fn [commands-to-run [section-id section]]
@@ -22,7 +22,7 @@
    (into {} (for [command-node maps]
 			  [(get command-node command) command-node]))))
 
-(defn replace-return-and-apply-upper [result]
+(defn replace-newline-and-apply-upper [result]
   (-> result
 	(clojure.string/replace #"\n" "")
 	(clojure.string/upper-case)))

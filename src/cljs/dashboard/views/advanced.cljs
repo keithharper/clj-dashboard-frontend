@@ -1,16 +1,18 @@
 (ns dashboard.views.advanced
   (:require [reagent.core :as reagent]
-			[re-frame.core :refer [subscribe dispatch dispatch-sync]]
+			[re-frame.core :refer [subscribe dispatch dispatch-sync purge-event-queue]]
 			[clojure.string :as str]
-			[dashboard.views.images :as images]))
+			[dashboard.views.images :as images]
+			[dashboard.views.components :as components])
+  (:require-macros [reagent.core :refer [with-let]]))
 
-(defn command-nodes-to-section [{:keys [section command active] :as section->command}]
+(defn sidebar-commands [{:keys [section command active] :as section->command}]
   (let [selected? @(subscribe [:get-selected-command section->command])]
 	^{:key command}
-	[:div.sidebar__item.mdl-button
+	[:div.sidebar__item.mdl-button.navbar
 	 {:class    (when selected? "active")
 	  :on-click #(if-not selected?
-				   (dispatch [:fetch-advanced-command-result section->command])
+				   (dispatch [:fetch-selected-command-result section->command])
 				   (dispatch [:remove-selected-command section->command]))}
 	 [:div.command-node command]
 	 [:button.sidebar-button
@@ -19,31 +21,37 @@
 
 (defn sidebar-section [{:keys [section-id section]}]
   ^{:key section-id}
-  [:div
-   [:button.accordion.mdl-button
+  [:div.nav-tabs
+   [:button.accordion.mdl-button.navbar
 	{:class    (when (:active section) "active")
-	 :on-click #(dispatch [:set-section-active section])}
-
-	[:div.sidebar__section__arrow]
-	[:div.sidebar__section__label section-id]]
-   [:div.sidebar__section {:class (when (:active section) "active")}
-	(doall (map #(command-nodes-to-section {:section section-id :command (first %) :active (:active (second %))})
+	 :on-click #(dispatch [:toggle-menu-section section])}
+	[:div.sidebar__section__label section-id]
+	[:div.sidebar__section__arrow]]
+   [:div.sidebar__section {:class (when-not (:active section) "collapse")}
+	(doall (map #(sidebar-commands {:section section-id :command (first %) :active (:active (second %))})
 			 (:commands section)))]])
 
 (defn sidebar-menu-nodes []
-  (let [available-admin-commands @(subscribe [:available-admin-commands])]
+  (let [available-admin-commands @(subscribe [:advanced-commands-to-display])]
 	(doall (map #(sidebar-section {:section-id (first %) :section (second %)}) available-admin-commands))))
 
-(defn command-card [{:keys [section command execution-ts result] :as section->command}]
+(defn command-card [{:keys [section command execution-ts result status] :as section->command}]
   ^{:key command}
   [:div.card.command
-   [:button.mdl-button.card__delete-button {:on-click #(dispatch [:remove-selected-command section->command])}
-	"x"]
-   [:div.card__command-name command]
-   [:div.card__date execution-ts]
+   [:div.card-headers
+	[:div.card-buttons
+	 [:button.mdl-button {:role     "button"
+						  :on-click #(dispatch [:fetch-selected-command-result section->command])}
+	  (:refresh-single-image images/svgs)]
+	 [:button.mdl-button.card__delete-button {:on-click #(dispatch [:remove-selected-command section->command])}
+	  (:deselect-single-image-black images/svgs)]]
+	[:div.card__command-name command]
+	[:div.card__date execution-ts]]
    [:div.card__container
 	[:div.card__description
-	 [:div.output result]]]])
+	 [:div.output (if (= "pending" status)
+					[:div.card__spinner (:spinner images/svgs)]
+					result)]]]])
 
 (defn command-nodes []
   (let [selected-commands @(subscribe [:selected-commands])]
@@ -53,27 +61,33 @@
 	  selected-commands)))
 
 (defn card-container []
+  [:div (seq (command-nodes))])
+
+(defn sidebar-overlay []
   (let [menu-status @(subscribe [:menu-status])]
-	[:div.main {:on-click #(dispatch [:set-menu-inactive])}
-	 [:div {:class (when menu-status "sidebar-active")}]
-	 (seq (command-nodes))]))
+	[:div {:on-click #(dispatch [:set-menu-inactive])}
+	 [:div {:class (when menu-status "overlay-active")}]]))
 
 (defn sidebar-menu []
-  (let [menu-status @(subscribe [:menu-status])]
-	[:div.sidebar {:class (when menu-status "active")}
-	 (seq (sidebar-menu-nodes))]))
+  (let [menu-active? @(subscribe [:menu-status])]
+	[:div.sidebar-container.col-md-12.col-lg-4.col-xl-3 {:class (when-not menu-active? "collapse")}
+	 [:div.sidebar
+	  [:div.navbar-brand.sidebar-header
+	   [:div.sidebar-title "Advanced Commands"]]
+	  [:div.input-group.filter-input
+	   [:input.form-control {:name      "filter" :placeholder "Filter" :type "text"
+							 :on-change #(dispatch [:filter-advanced-commands (str (.-target.value %))])}]]
+	  (seq (sidebar-menu-nodes))]]))
 
 (defn alert-container []
   (let [alert-message @(subscribe [:alert-message])]
 	(when (not (nil? alert-message))
-	  [:div {:id "alert"}
-	   [:a.alert.active alert-message]])))
+	  [:div.alert.command-alert.active alert-message])))
 
 (defn system-shutdown-button []
   [:button.header__button.mdl-button
    {:id         "shutdown-button"
 	:aria-label "Shutdown"
-	:style      {:padding "3px" :background-color "transparent"}
 	:title      "Initiate system shutdown"
 	:on-click   #(when (js/confirm "This will initiate a system shutdown.")
 				   (dispatch [:send-system-shutdown-request]))}
@@ -84,7 +98,6 @@
   [:button.header__button.mdl-button
    {:id         "configure-wan-button"
 	:aria-label "Configure WAN"
-	:style      {:padding "3px" :background-color "transparent"}
 	:title      "Configure WAN connection"
 	:on-click   #(when (js/confirm "Make sure to connect the Gigabit port to the network before you continue.")
 				   (dispatch [:send-configure-wan-request]))}
@@ -95,49 +108,23 @@
   [:button.header__button.mdl-button
    {:id         "initiate-upload-button"
 	:aria-label "Upload"
-	:style      {:padding "3px" :background-color "transparent"}
 	:title      "Initiate upload of media files"
 	:on-click   #(when (js/confirm "This will toggle the upload status. Make sure the active connection is not cellular before proceeding.") ;; TODO: Add logic to first check what the active connection is?
 				   (dispatch [:send-initiate-upload-request]))}
    "Upload"
    (:initiate-upload-image images/svgs)])
 
-(defn refresh-all-button []
-  [:button.header__button.mdl-button
-   {:id         "refresh-button"
-	:aria-label "Refresh"
-	:style      {:padding "3px" :background-color "transparent"}
-	:title      "Refresh output of all selected commands"
-	:on-click   #(dispatch [:fetch-all-selected-command-results])}
-   "Refresh All"
-   (:refresh-all-image images/svgs)])
 
 (defn deselect-all-button []
   [:button.header__button.mdl-button
    {:id         "deselect-all-button"
 	:aria-label "Deselect All"
-	:style      {:padding "3px" :background-color "transparent"}
 	:title      "Deselect all currently selected commands"
 	:on-click   #(dispatch [:deselect-all-commands])}
    "Deselect All"
    (:deselect-all-image images/svgs)])
 
-(defn dashboard-page-button []
-  [:div.header__button.mdl-button
-   {:id         "dashboard-button"
-	:title      "Switch to Advanced mode"
-	:aria-label "Dashboard"
-	:style      {:padding "3px" :background-color "transparent"}
-	:on-click   #(dispatch [:set-active-page :home])}
-   "Dashboard"
-   (:dashboard-image images/svgs)])
-
-(defn rocketiot-logo []
-  [:div.header__title {:id "logo" :style {:display "flex" :-webkit-font-smoothing "antialiased"}}
-   [:div {:style {:color "#f2a900" :cursor "default" :font-weight "bold"}} "ROCKET"]
-   [:div {:style {:color "#fff" :cursor "default"}} "IoT"]])
-
-(defn toggle-menu-button []
+(defn toggle-sidebar-button []
   (let [menu-status @(subscribe [:menu-status])]
 	[:button.mdl-button.c-hamburger.c-hamburger--htla
 	 {:id       "menu-button"
@@ -145,24 +132,45 @@
 	  :on-click #(dispatch [:toggle-menu])}
 	 [:span "Toggle menu"]]))
 
+(defn header-navbar []
+  [:div.header.navbar.navbar-inverse.modal-header
+   [:div.container-fluid
+	[:div.nav
+	 [toggle-sidebar-button]
+	 [components/rocketiot-logo]]
+	[:div.nav
+	 [:div.advanced-header-commands
+	  [system-shutdown-button]
+	  [configure-wan-button]
+	  [initiate-upload-button]
+	  [deselect-all-button]]
+	 [components/refresh-all-button #(dispatch [:fetch-all-selected-command-results])]
+	 [components/home-page-button]]]])
+
+(defn undo-container
+  [explanation]
+  [:div.undo-container-parent.fixed-bottom
+   [:div.undo-container
+	[:div.undo-desc explanation]
+	[:div.undo-button.mdl-button {:on-click #(dispatch [:undo])}
+	 "UNDO"]
+	[:div.mdl-button {:on-click #(dispatch [:purge-undos])} (:deselect-single-image-white images/svgs)]]])
+
+
+(defn undo-parent-container
+  []
+  (when-let [undos? @(subscribe [:undos?])]
+	(let [explanations @(subscribe [:undo-explanations])]
+	  (dispatch [:purge-undos-later])
+	  [undo-container (last explanations)])))
+
 (defn ui []
-  [:div
-   [:header.header
-	[toggle-menu-button]
-	[rocketiot-logo]
-	[:div.header-buttons
-	 [system-shutdown-button]
-	 [configure-wan-button]
-	 [initiate-upload-button]
-	 [refresh-all-button]
-	 [deselect-all-button]
-	 [dashboard-page-button]]]
-   [alert-container]
-   [sidebar-menu]
-   [card-container]])
-
-(defn ^:export check-uploaded-files []
-  (dispatch [:fetch-command-result {:section "System Status" :command "Media Files Uploaded"}]))
-
-(defn ^:export print-selected-commands []
-  (println @(subscribe [:selected-commands])))
+  [:div.base-container
+   [header-navbar]
+   [:div.row.main-container
+	[sidebar-menu]
+	[:div.modal-body.command-container {:class (when @(subscribe [:menu-status])
+												 "col-md-12 col-lg-8 col-xl-9 sidebar-active")}
+	 [alert-container]
+	 [card-container]]]
+   [undo-parent-container]])

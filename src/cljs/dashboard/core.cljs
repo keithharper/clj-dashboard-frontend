@@ -4,27 +4,17 @@
 			[re-frame.core :as rf :refer [subscribe dispatch dispatch-sync reg-event-db reg-event-fx]]
 			[dashboard.subs]
 			[dashboard.events]
-			[dashboard.router]
+			[dashboard.routes]
 			[dashboard.views.core :as views]
-			[cljs.core.async :refer [<! chan]]
-			[cljs-http.client :as http]
-			[re-frame.db :as db]))
+			[devtools.core :as devtools]))
 
 ;; -- Debugging aids ----------------------------------------------------------
-;(devtools/install!)
-(enable-console-print!)
-
-;(defn ^:export init
-;  []
-;  (dispatch-sync [:initialize]))
-;
-;(defn ^:export send-available-commands-request
-;  []
-;  (dispatch [:request-available-commands]))
+(devtools/install!)
 
 (defn ^:export main
   []
   (dispatch-sync [:init-db])
+  (dashboard.routes/routes)
   (reagent/render [views/main-panel]
 	(.getElementById js/document "main")))
 
