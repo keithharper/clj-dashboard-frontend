@@ -1,11 +1,24 @@
 (ns dashboard.views.components
   (:require [dashboard.views.images :as images]
-			[re-frame.core :refer [subscribe dispatch dispatch-sync]]))
+			[secretary.core :as secretary :refer [dispatch!]]))
+
+(defn do-logout []
+  (do (.preventDefault %)
+	  (secretary.core/dispatch! "/logout")))
 
 (defn rocketiot-logo []
-  [:div.header__title.navbar-header {:id "logo" :style {:display "flex" :-webkit-font-smoothing "antialiased"}}
-   [:div {:style {:color "#f2a900" :cursor "default" :font-weight "bold"}} "ROCKET"]
-   [:div {:style {:color "#fff" :cursor "default"}} "IoT"]])
+  [:div.header__title.navbar-header
+   {:id    "logo"
+	:style {:display                "flex"
+			:-webkit-font-smoothing "antialiased"}}
+   [:div
+	{:style {:color       "#f2a900"
+			 :cursor      "default"
+			 :font-weight "bold"}}
+	"ROCKET"]
+   [:div
+	{:style {:color "#fff" :cursor "default"}}
+	"IoT"]])
 
 (defn refresh-all-button [dispatcher]
   [:span.header__button.mdl-button
@@ -22,6 +35,7 @@
 	:title      "Go to login page"
 	:aria-label "Login"
 	:href       "#/login"}
+   "Login"
    (:login-image images/svgs)])
 
 (defn logout-button []
@@ -29,7 +43,9 @@
    {:id         "logout-button"
 	:title      "Logout"
 	:aria-label "Logout"
-	:on-click #(dispatch [:logout])}
+	:href       "#/home"
+	:on-click   #(do-logout)}
+   "Logout"
    (:logout-image images/svgs)])
 
 (defn home-page-button []
