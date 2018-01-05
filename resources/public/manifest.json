@@ -1,0 +1,26 @@
+{
+  "name": "Production Interface",
+  "short_name": "Production",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "theme_color": "#3A3A3A",
+  "background_color": "#3A3A3A",
+  "description": "Production interface for the RocketIoT.",
+  "icons": [
+    {
+        "src": "images/RocketIoT_48.png",
+        "type": "image/png",
+        "sizes": "48x31"
+    },
+    {
+        "src": "images/RocketIoT_96.png",
+        "type": "image/png",
+        "sizes": "96x62"
+    },
+    {
+        "src": "images/RocketIoT_192.png",
+        "type": "image/png",
+        "sizes": "192x124"
+    }
+  ]
+}
