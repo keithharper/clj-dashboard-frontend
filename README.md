@@ -1,10 +1,12 @@
-# clj-dashboard-frontend
+# health-dashboard-clj
 
-A Clojure/ClojureScript implementation of the dashboard app.
+This is a health dashboard that runs a series of diagnostic batteries on the home page and offers authorized users the ability to run advanced commands which displays the raw output.
 
-## Usage
+Example of home page:
+<img src="/images/logo/dashboard-home.png?raw=true">
 
-None at this time.
+Example of advanced page:
+<img src="/images/logo/dashboard-advanced.png?raw=true">
 
 ## License
 
