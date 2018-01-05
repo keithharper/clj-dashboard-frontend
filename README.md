@@ -1,4 +1,4 @@
-# health-dashboard-clj
+# device-dashboard-clj
 
 This is a health dashboard that runs a series of diagnostic batteries on the home page and offers authorized users the ability to run advanced commands which displays the raw output.
 
