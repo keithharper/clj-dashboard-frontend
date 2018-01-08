@@ -50,6 +50,7 @@
 (defn handle-authentication-request
   [{{credentials :credentials} :params :as request}]
   (try (-> (dispatcher/dispatch-authentication credentials)
+           (:body)
            (ok-response-as-json)
            (assoc :session (assoc (:session request) :identity {:authenticated? true})))
        (catch Exception ex    ;; TODO: Add special handling to account for unreachable authenticator?
