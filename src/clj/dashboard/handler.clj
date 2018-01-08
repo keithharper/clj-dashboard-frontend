@@ -118,4 +118,4 @@
                           :ssl?         true
                           :ssl-port     8443
                           :keystore     "resources/conf/keystore"
-                          :key-password "u1t4i8l4ity"})))
+                          :key-password (slurp "resources/conf/keystore-password")})))
