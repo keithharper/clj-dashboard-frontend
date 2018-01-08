@@ -10,6 +10,6 @@ Example of advanced page:
 
 ## License
 
-Copyright © 2017 Keith Harper
+Copyright © 2018 Keith Harper
 
 [MIT](LICENSE)
