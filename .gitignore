@@ -4,8 +4,8 @@
 /classes
 /checkouts
 /dev-resources/public/js/*
-/dev-resources/public/css/*
-/resources/public/css/*
+/dev-resources/public/css/*.css
+/resources/public/css/*.css
 /out
 /.idea
 /dev
