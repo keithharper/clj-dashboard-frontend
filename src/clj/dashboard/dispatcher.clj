@@ -12,11 +12,10 @@
 (defn result->json [result]
   (json/write-str (assoc result :execution-ts (now))))
 
-(defn get-execution-result [request result]
-  (assoc request
-    :result
-    (or (not-empty (get result :out "fail")) "fail") ;; TODO: Clean this up
-    ))
+(defn get-execution-result [request {out :out}]
+  {:pre [(or (not (empty? out))
+             (throw (Exception. "Pre-condition failed; result is empty.")))]}
+  (assoc request :result out))
 
 (defn dispatch-run-command [request]
   (try (->> request
