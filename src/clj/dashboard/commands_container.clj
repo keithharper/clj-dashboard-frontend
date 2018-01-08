@@ -3,10 +3,10 @@
 
 ;;; command collections ;;;
 (def dashboard-commands
-  (json/read-json (slurp "resources/conf/dashboard.json")))
+  (json/read-str (slurp "resources/conf/dashboard.json") :key-fn keyword))
 
 (def advanced-commands
-  (json/read-json (slurp "resources/conf/commands.json")))
+  (json/read-str (slurp "resources/conf/commands.json") :key-fn keyword))
 
 ;;; collection lookup ;;;
 
@@ -19,12 +19,8 @@
 (defn get-executor-args [{:keys [section command command-type]}]
   (let [commands-coll (command-type command-types)]
     (->> commands-coll
-         (filter #(= (:section %) section))
-         (first)
-         (:commands)
-         (filter #(= (:command %) command))
-         (first)
-         (:command-value))))
+         (some #(if (= (:section %) section) (:commands %)))
+         (some #(if (= (:command %) command) (:command-value %))))))
 
 (defn- prepare-command-list [coll]
   (->> coll
