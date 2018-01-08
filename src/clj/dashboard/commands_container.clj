@@ -29,10 +29,9 @@
 (defn- prepare-command-list [coll]
   (->> coll
        (filter #(not= "Admin" (:section %)))
-       (map
-         (fn [section]
-           (assoc-in section [:commands]
-                     (map #(dissoc % :command-value) (:commands section)))))))
+       (map (fn [section]
+              (assoc-in section [:commands]
+                        (map #(dissoc % :command-value) (:commands section)))))))
 
 (defn get-commands [{command-type :command-type}]
   (-> (get command-types command-type)

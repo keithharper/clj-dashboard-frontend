@@ -4,7 +4,7 @@
     [compojure.core :refer :all]
     [compojure.route :as route]
     [compojure.middleware :refer [remove-trailing-slash]]
-    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+    [ring.middleware.defaults :as ring-defaults :refer [wrap-defaults site-defaults]]
     [ring.middleware.json :refer [wrap-json-params]]
     [ring.middleware.session :refer [wrap-session]]
     [ring.middleware.gzip :refer [wrap-gzip]]
@@ -68,44 +68,44 @@
       (wrap-authentication backend)))
 
 (defroutes default-routes
-           (route/resources "/")
-           (route/not-found "Page not found."))
+  (route/resources "/")
+  (route/not-found "Page not found."))
 
 (defroutes home-routes
-           (context "/home" []
-             (GET "/commands" [] #(handle-get-commands-request (assoc-in % [:params :command-type] :dashboard)))
-             (POST "/run" session #(handle-run-command-request (assoc-in % [:params :command-type] :dashboard)))))
+  (context "/home" []
+    (GET "/commands" [] #(handle-get-commands-request (assoc-in % [:params :command-type] :dashboard)))
+    (POST "/run" session #(handle-run-command-request (assoc-in % [:params :command-type] :dashboard)))))
 
 (defroutes advanced-routes
-           (context "/advanced" []
-             (secure-routes
-               (GET "/commands" [] #(handle-get-commands-request (assoc-in % [:params :command-type] :advanced)))
-               (POST "/run" session #(handle-run-command-request (assoc-in % [:params :command-type] :advanced))))))
+  (context "/advanced" []
+    (secure-routes
+      (GET "/commands" [] #(handle-get-commands-request (assoc-in % [:params :command-type] :advanced)))
+      (POST "/run" session #(handle-run-command-request (assoc-in % [:params :command-type] :advanced))))))
 
 (defroutes auth-routes
-           (context "/auth" []
-             (POST "/login" session handle-authentication-request)
-             (POST "/logout" session handle-logout-request)))
+  (context "/auth" []
+    (POST "/login" session handle-authentication-request)
+    (POST "/logout" session handle-logout-request)))
 
 (defroutes index-route
-           (GET "/" [] (resource-response-as-html "index.html")))
+  (GET "/" [] (resource-response-as-html "index.html")))
 
 (defn dashboard-routes [& dashboard-routes]
   (wrap-identity (apply routes dashboard-routes)))
 
 (defroutes app-routes
-           (context "/dashboard" []
-             (dashboard-routes
-               index-route
-               auth-routes
-               home-routes
-               advanced-routes
-               default-routes))
-           (context "/*" []
-             (GET "/" [] (response/redirect "/dashboard"))))
+  (context "/dashboard" []
+    (dashboard-routes
+      index-route
+      auth-routes
+      home-routes
+      advanced-routes
+      default-routes))
+  (context "/*" []
+    (GET "/" [] (response/redirect "/dashboard"))))
 
 (def app (-> app-routes
-             ;(wrap-defaults site-defaults)
+             ;(wrap-defaults ring-defaults/secure-site-defaults)
              (wrap-defaults (assoc-in site-defaults [:security :anti-forgery] false)) ;; dev only
              (wrap-gzip)
              (wrap-session)
