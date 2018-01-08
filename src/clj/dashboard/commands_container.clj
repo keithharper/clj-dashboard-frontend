@@ -16,20 +16,25 @@
 
 ;;; collection helper functions ;;;
 
-(defn filter-for-command-value [{:keys [section command command-type]}]
+(defn get-executor-args [{:keys [section command command-type]}]
   (let [commands-coll (command-type command-types)]
-	(->> commands-coll
-	  (filter #(= (:section %) section))
-	  (first)
-	  (:commands)
-	  (filter #(= (:command %) command))
-	  (first)
-	  (:command-value))))
+    (->> commands-coll
+         (filter #(= (:section %) section))
+         (first)
+         (:commands)
+         (filter #(= (:command %) command))
+         (first)
+         (:command-value))))
 
 (defn- prepare-command-list [coll]
   (->> coll
-	(filter #(not= "Admin" (:section %)))
-	(map (fn [section] (assoc-in section [:commands] (map #(dissoc % :command-value) (:commands section)))) )))
+       (filter #(not= "Admin" (:section %)))
+       (map
+         (fn [section]
+           (assoc-in section [:commands]
+                     (map #(dissoc % :command-value) (:commands section)))))))
 
-(defn get-commands-for-type [command-type]
-  (json/write-str (prepare-command-list (command-type command-types))))
+(defn get-commands [{command-type :command-type}]
+  (-> (get command-types command-type)
+      (prepare-command-list)
+      (json/write-str)))

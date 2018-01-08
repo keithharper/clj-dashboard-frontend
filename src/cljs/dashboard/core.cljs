@@ -1,20 +1,18 @@
 (ns dashboard.core
-  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as reagent]
-			[re-frame.core :as rf :refer [subscribe dispatch dispatch-sync reg-event-db reg-event-fx]]
-			[dashboard.subs]
-			[dashboard.events]
-			[dashboard.routes]
-			[dashboard.views.core :as views]
-			[devtools.core :as devtools]))
+            [re-frame.core :as re-frame :refer [dispatch-sync]]
+            [dashboard.subs]
+            [dashboard.events]
+            [dashboard.routes :as routes]
+            [dashboard.views.core :as views]
+    ;[devtools.core :as devtools]
+            ))
 
 ;; -- Debugging aids ----------------------------------------------------------
-(devtools/install!)
+;(devtools/install!)
 
-(defn ^:export main
-  []
-  (dispatch-sync [:init-db])
-  (dashboard.routes/routes)
-  (reagent/render [views/main-panel]
-	(.getElementById js/document "main")))
+(defn ^:export main []
+  (re-frame/dispatch-sync [:init-db])
+  (routes/initialize-routes)
+  (reagent/render [views/main-panel] (.getElementById js/document "main")))
 
